@@ -1,0 +1,177 @@
+{
+  "domain": "agent_harness",
+  "display_name": "Agent Harness 开发",
+  "description": "AI Agent 应用开发技能评估 — 从基础概念到多 Agent 协作的全栈能力",
+  "keywords": ["agent", "harness", "ai agent", "智能体", "langchain", "langgraph", "autogpt", "claude", "openai", "llm"],
+  "bloom_progression": ["remember", "understand", "apply", "analyze", "evaluate", "create"],
+  "knowledge_areas": [
+    {
+      "id": "agent_basics",
+      "name": "Agent 基础概念",
+      "bloom_level": "remember",
+      "prerequisites": [],
+      "self_assessment_prompt": "对 LLM Agent 的定义、核心组件（LLM + 工具 + 记忆 + 规划）以及与普通 chatbot 区别的理解程度",
+      "assessment_items": [
+        {
+          "id": "agent_basics_1",
+          "question": "请简述 LLM Agent 与传统 Chatbot 的三个核心区别，以及这些区别如何影响应用场景。",
+          "bloom_level": "remember",
+          "expected_keywords": ["工具调用", "自主决策", "多步推理", "记忆", "规划"]
+        },
+        {
+          "id": "agent_basics_2",
+          "question": "一个完整的 LLM Agent 系统通常由哪些核心模块组成？请描述各模块的职责。",
+          "bloom_level": "remember",
+          "expected_keywords": ["LLM/大模型", "工具/Function", "记忆/Memory", "规划/Planning"]
+        }
+      ]
+    },
+    {
+      "id": "prompt_engineering",
+      "name": "Prompt Engineering",
+      "bloom_level": "understand",
+      "prerequisites": ["agent_basics"],
+      "self_assessment_prompt": "对 System Prompt 设计、Few-shot Learning、Chain-of-Thought 等 Prompt 工程技术的掌握程度",
+      "assessment_items": [
+        {
+          "id": "prompt_eng_1",
+          "question": "在 Agent 场景下，System Prompt 需要包含哪些关键要素？请举例说明一个结构化的 System Prompt 应该如何组织。",
+          "bloom_level": "understand",
+          "expected_keywords": ["角色定义", "能力边界", "工具描述", "输出格式", "安全约束"]
+        },
+        {
+          "id": "prompt_eng_2",
+          "question": "Chain-of-Thought (CoT) 和 Few-shot 提示在 Agent 开发中各有什么用途？它们如何提升 Agent 的推理质量？",
+          "bloom_level": "understand",
+          "expected_keywords": ["逐步推理", "示例引导", "格式约束", "质量提升"]
+        }
+      ]
+    },
+    {
+      "id": "tool_use",
+      "name": "Tool Use & Function Calling",
+      "bloom_level": "apply",
+      "prerequisites": ["agent_basics", "prompt_engineering"],
+      "self_assessment_prompt": "对 Function Calling 机制、JSON Schema 工具定义、工具注册和调用的实际操作能力",
+      "assessment_items": [
+        {
+          "id": "tool_use_1",
+          "question": "请描述如何为一个 Agent 定义一个可调用的工具。包括 JSON Schema 的编写方式、参数验证和错误处理策略。",
+          "bloom_level": "apply",
+          "expected_keywords": ["JSON Schema", "参数定义", "类型校验", "错误处理", "description"]
+        },
+        {
+          "id": "tool_use_2",
+          "question": "当一个 Agent 需要串联调用多个工具（如先查数据库再发邮件），你会如何设计调用链？需要考虑哪些异常情况？",
+          "bloom_level": "apply",
+          "expected_keywords": ["依赖关系", "错误恢复", "重试机制", "上下文传递"]
+        }
+      ]
+    },
+    {
+      "id": "agent_architecture",
+      "name": "Agent 架构模式",
+      "bloom_level": "analyze",
+      "prerequisites": ["tool_use"],
+      "self_assessment_prompt": "对 ReAct、Plan-and-Execute、LangGraph 等主流 Agent 架构模式的理解和比较分析能力",
+      "assessment_items": [
+        {
+          "id": "agent_arch_1",
+          "question": "ReAct 模式中的 Thought-Action-Observation 循环如何解决纯推理或纯行动模式的局限性？请分析其优缺点。",
+          "bloom_level": "analyze",
+          "expected_keywords": ["推理与行动交替", "动态调整", "上下文积累", "token消耗"]
+        },
+        {
+          "id": "agent_arch_2",
+          "question": "比较 Plan-and-Execute 架构与 ReAct 架构在处理复杂多步任务时的差异。什么场景下应优先选择哪种架构？",
+          "bloom_level": "analyze",
+          "expected_keywords": ["全局规划", "灵活调整", "任务复杂度", "执行效率"]
+        }
+      ]
+    },
+    {
+      "id": "memory_system",
+      "name": "记忆系统",
+      "bloom_level": "analyze",
+      "prerequisites": ["agent_architecture"],
+      "self_assessment_prompt": "对 Agent 记忆系统设计（短期/长期/工作记忆）、RAG 检索增强生成的理解和实践能力",
+      "assessment_items": [
+        {
+          "id": "memory_1",
+          "question": "在设计 Agent 的记忆系统时，短期记忆、长期记忆和工作记忆各有什么不同的实现方式和适用场景？",
+          "bloom_level": "analyze",
+          "expected_keywords": ["上下文窗口", "向量数据库", "摘要", "检索策略"]
+        },
+        {
+          "id": "memory_2",
+          "question": "RAG（检索增强生成）在 Agent 记忆系统中扮演什么角色？请描述一个完整的 RAG 管道的核心步骤。",
+          "bloom_level": "analyze",
+          "expected_keywords": ["向量化", "索引", "相似度检索", "重排序", "上下文注入"]
+        }
+      ]
+    },
+    {
+      "id": "safety_eval",
+      "name": "安全与评估",
+      "bloom_level": "evaluate",
+      "prerequisites": ["agent_architecture"],
+      "self_assessment_prompt": "对 Agent 安全防护（Prompt注入防御、权限控制）和评估方法（评估框架、可观测性）的了解程度",
+      "assessment_items": [
+        {
+          "id": "safety_1",
+          "question": "一个面向用户的 Agent 系统面临哪些主要安全威胁？请列举至少三种攻击方式及其防御策略。",
+          "bloom_level": "evaluate",
+          "expected_keywords": ["Prompt注入", "越权操作", "数据泄露", "输入过滤", "权限分离"]
+        },
+        {
+          "id": "safety_2",
+          "question": "如何系统地评估一个 Agent 的性能？你会设计哪些指标和测试方法？",
+          "bloom_level": "evaluate",
+          "expected_keywords": ["任务完成率", "工具调用准确率", "延迟", "成本", "A/B测试"]
+        }
+      ]
+    },
+    {
+      "id": "multi_agent",
+      "name": "多 Agent 协作",
+      "bloom_level": "evaluate",
+      "prerequisites": ["agent_architecture", "memory_system"],
+      "self_assessment_prompt": "对多 Agent 系统的分工编排、通信机制、冲突解决策略的理解",
+      "assessment_items": [
+        {
+          "id": "multi_agent_1",
+          "question": "设计一个多 Agent 协作系统时，如何划分 Agent 的职责？需要考虑哪些因素来决定用一个还是多个 Agent？",
+          "bloom_level": "evaluate",
+          "expected_keywords": ["职责单一", "通信开销", "一致性", "可扩展性"]
+        },
+        {
+          "id": "multi_agent_2",
+          "question": "当多个 Agent 对同一个问题给出不同方案时，如何设计仲裁或合并机制？请描述至少两种策略。",
+          "bloom_level": "evaluate",
+          "expected_keywords": ["投票机制", "优先级", "评审Agent", "人类介入"]
+        }
+      ]
+    },
+    {
+      "id": "project_design",
+      "name": "实战项目设计",
+      "bloom_level": "create",
+      "prerequisites": ["multi_agent", "safety_eval"],
+      "self_assessment_prompt": "从需求分析到架构选型再到部署的完整 Agent 项目设计能力",
+      "assessment_items": [
+        {
+          "id": "project_1",
+          "question": "如果让你设计一个能帮助用户完成调研报告的 Agent 系统，你会如何拆解需求、选择架构、设计工具集和评估方案？",
+          "bloom_level": "create",
+          "expected_keywords": ["需求拆解", "架构选择", "工具设计", "评估方案"]
+        },
+        {
+          "id": "project_2",
+          "question": "在将 Agent 系统从原型推进到生产环境时，需要解决哪些关键问题？请从可靠性、成本和可维护性三个角度分析。",
+          "bloom_level": "create",
+          "expected_keywords": ["错误处理", "降级方案", "成本控制", "日志监控", "版本管理"]
+        }
+      ]
+    }
+  ]
+}

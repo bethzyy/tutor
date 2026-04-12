@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python main.py --list-themes)",
+      "Bash(python main.py \"C:/D/CAIE_tool/MyAIProduct/tutor\" --top 5 --output markdown)",
+      "Bash(python main.py --list-dimensions)",
+      "Bash(python main.py -d eq,mindset,distortions -q 8 --output json)",
+      "Bash(python main.py -d eq,mindset,distortions -q 9 --output json)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Total: {d[\\\\\"total_questions\\\\\"]}'\\); [print\\(f'  {q[\\\\\"id\\\\\"]} {q[\\\\\"title\\\\\"]}'\\) for q in d['questions']]\")",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\(f'Total:{d[\\\\\"total_questions\\\\\"]}'\\);[print\\(f'  {q[\\\\\"id\\\\\"]} {q[\\\\\"title\\\\\"]}'\\) for q in d['questions']]\")",
+      "Bash(npm run:*)"
+    ]
+  }
+}
