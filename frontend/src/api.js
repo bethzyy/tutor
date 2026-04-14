@@ -99,6 +99,7 @@ async function request(url, options = {}) {
 export const getState = () => request('/state');
 export const setMode = (mode) => request('/state/set_mode', { method: 'POST', body: { mode } });
 export const classifyGoal = (goal) => request('/state/classify_goal', { method: 'POST', body: { goal } });
+export const getMotivationQuestion = (goal) => request('/state/motivation_question', { method: 'POST', body: { goal } });
 
 export const startDiagnose = () => request('/diagnose/start', { method: 'POST' });
 export const submitDiagnoseAnswer = (questionId, answer, score, maxScore) =>
@@ -114,6 +115,7 @@ export const getAssessmentReport = (sessionId) =>
   request('/assessment/report', { method: 'POST', body: { session_id: sessionId } });
 export const getLatestAssessmentReport = () => request('/assessment/report');
 export const resumeAssessment = () => request('/assessment/resume');
+export const getMidtermCheck = () => request('/state/midterm_check', { method: 'POST' });
 export const submitSelfRatings = (sessionId, ratings) =>
   request('/diagnose/self-rate', { method: 'POST', body: { session_id: sessionId, ratings } });
 export const submitValidationAnswers = (sessionId, answers) =>

@@ -6,6 +6,7 @@ export default function FinalReport({ state }) {
   const plan = state.plan || {};
   const certRef = useRef(null);
   const [exporting, setExporting] = useState(false);
+  const initialReport = state.latest_report || null;
 
   const handleExportImage = async () => {
     if (!certRef.current) return;
@@ -78,6 +79,54 @@ export default function FinalReport({ state }) {
           {exporting ? '生成中...' : '💾 保存证书图片'}
         </button>
       </div>
+
+      {/* Growth Comparison */}
+      {initialReport && (initialReport.scale_scores || initialReport.weaknesses) && (
+        <div className="notion-card p-6 mb-6">
+          <h3
+            className="text-[17px] font-bold text-notion-black mb-4"
+            style={{ letterSpacing: '-0.25px' }}
+          >
+            成长对比
+          </h3>
+          <p className="text-xs text-notion-warm-gray-400 mb-4">初始评估 vs 完成时状态</p>
+
+          {initialReport.scale_scores && Object.keys(initialReport.scale_scores).length > 0 && (
+            <div className="space-y-3 mb-4">
+              {Object.entries(initialReport.scale_scores).map(([id, s]) => (
+                <div key={id}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-notion-black">{s.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold" style={{ color: s.color }}>{s.label}</span>
+                      <span className="text-xs text-notion-warm-gray-300">{s.avg}/{s.max_per_item}</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-black/5 rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${(s.avg / s.max_per_item) * 100}%`, backgroundColor: s.color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {initialReport.weaknesses && initialReport.weaknesses.length > 0 && (
+            <div>
+              <p className="text-xs text-notion-warm-gray-500 mb-2">初始识别的弱点</p>
+              <div className="flex flex-wrap gap-2">
+                {initialReport.weaknesses.map((w, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-700">
+                    {w.name} <span className="text-green-500">→ 已完成针对性学习</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Summary */}
       <div className="notion-card p-6 mb-6">

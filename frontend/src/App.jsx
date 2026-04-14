@@ -121,7 +121,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-notion mx-auto px-6 py-8">
+      {/* Chat pages use minimal padding; other pages keep comfortable spacing */}
+      <main className={`max-w-notion mx-auto px-4 ${(isConsultation && hasWeaknesses) || (hasPlan && !passed && !isConsultation) ? 'py-1' : 'py-8'}`}>
         <Routes>
           {!hasGoal ? (
             <>

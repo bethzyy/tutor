@@ -12,7 +12,7 @@
 
 import db from '../db.js';
 
-// Reuse the OpenAI client from ai.js (same ZhipuAI endpoint)
+// Embeddings use OpenAI-compatible endpoint (Anthropic has no embedding API)
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -21,9 +21,9 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-  baseURL: process.env.OPENAI_BASE_URL || undefined,
+const embedClient = new OpenAI({
+  apiKey: process.env.ZHIPU_API_KEY || process.env.OPENAI_API_KEY || '',
+  baseURL: 'https://open.bigmodel.cn/api/paas/v4',
 });
 
 const EMBEDDING_MODEL = 'embedding-3';
@@ -45,7 +45,7 @@ async function getEmbedding(text) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
-    const response = await client.embeddings.create({
+    const response = await embedClient.embeddings.create({
       model: EMBEDDING_MODEL,
       input: text.slice(0, 500),
     }, { signal: controller.signal });

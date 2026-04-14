@@ -22,7 +22,27 @@ router.post('/generate_plan', async (req, res) => {
     }
     const weaknesses = JSON.parse(state.weaknesses || '[]');
 
-    const plan = await ai.generatePlan(goal, weaknesses, user.mode);
+    // Fetch latest deep profile if available
+    let deepProfile = null;
+    try {
+      const dp = db.get(
+        `SELECT p.* FROM deep_profiles p
+         JOIN deep_assessment_sessions s ON p.session_id = s.id
+         WHERE s.user_id = ?
+         ORDER BY p.created_at DESC LIMIT 1`,
+        [req.userId]
+      );
+      if (dp) {
+        deepProfile = {
+          core_findings: JSON.parse(dp.core_findings || '[]'),
+          growth_barriers: JSON.parse(dp.growth_barriers || '[]'),
+          inner_resources: JSON.parse(dp.inner_resources || '[]'),
+          intervention_direction: JSON.parse(dp.intervention_direction || '[]'),
+        };
+      }
+    } catch {}
+
+    const plan = await ai.generatePlan(goal, weaknesses, user.mode, deepProfile);
 
     if (plan.steps) {
       plan.steps.forEach((step, i) => {

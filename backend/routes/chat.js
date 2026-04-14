@@ -13,6 +13,15 @@ router.post('/', validate(chatSchema), async (req, res) => {
   try {
     const { message } = req.body;
 
+    // Crisis detection — intercept self-harm/suicide keywords before AI call
+    const crisisRe = /自杀|自伤|不想活|割腕|跳楼|吃药.*死|结束生命|活不下去/i;
+    if (crisisRe.test(message)) {
+      return res.json({
+        reply: '听到你说这些，我很担心你。请拨打24小时心理援助热线：400-161-9995（全国）/ 010-82951332（北京）。你不是一个人，有人愿意听你说。',
+        mirror_moment: null,
+      });
+    }
+
     const state = db.get('SELECT weaknesses, plan, current_step_id FROM learning_state WHERE user_id = ?', [req.userId]);
     if (!state) {
       return res.status(500).json({ error: '用户状态异常' });
@@ -60,14 +69,6 @@ router.post('/', validate(chatSchema), async (req, res) => {
       try { db.run('ROLLBACK'); } catch (_) {}
       console.error('Failed to save chat messages:', txErr.message);
     }
-
-    // L3: Store embedding for user message (fire-and-forget)
-    storeEmbedding(userMsgRow.id, message).catch(() => {});
-
-    // Insight processing (fire-and-forget, never blocks chat)
-    try {
-      insightEngine.processMessage(req.userId, userMsgRow.id, message).catch(() => {});
-    } catch (_) {}
 
     // Check for mirror moment (non-blocking, but wait briefly)
     let mirror_moment = null;

@@ -277,6 +277,9 @@ export default function Diagnosis({ refresh, isReassessment }) {
         <p className="text-base text-notion-warm-gray-500 mb-4">
           基于标准化心理量表和领域知识评估，科学测量你的成长状态
         </p>
+        <p className="text-xs text-notion-warm-gray-300 mb-6 max-w-md mx-auto leading-relaxed">
+          本评估参照国际标准心理量表（如 EQ-i 2.0、Dweck 心智模式量表等）设计，属于非标准化评估工具，仅供参考和个人成长反思使用，不能替代专业心理诊断。
+        </p>
         <div className="flex items-center justify-center gap-4 mb-8 text-sm text-notion-warm-gray-400">
           <span className="flex items-center gap-1.5">
             <span className="w-5 h-5 rounded bg-notion-warm-white flex items-center justify-center text-xs">⏱</span>

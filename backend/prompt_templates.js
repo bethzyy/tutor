@@ -152,24 +152,67 @@ ${qa.reverse_scored ? `实际得分：${qa.actual_score}/${qa.max_score}` : `实
 作为成长教练，请评估该性格/习惯弱点的严重程度。只输出一个词：high、medium或low。不要输出其他内容。`,
 
   // ---------- Plan Generation ----------
-  generate_plan: (goal, weaknesses, mode) => {
+  generate_plan: (goal, weaknesses, mode, deepProfile = null) => {
     if (mode === 'subject' || mode === 'skill') {
-      return templates.generate_plan_skill(goal, weaknesses);
+      return templates.generate_plan_skill(goal, weaknesses, deepProfile);
     }
     // character / integrated / default
-    return `用户目标：${goal}
+    let planContext = `用户目标：${goal}
 已知弱点：${JSON.stringify(weaknesses)}
-辅导模式：${mode}
-请生成一个分步成长计划，每步包含标题、预计天数、针对的弱点、步骤类型（knowledge、habit或personality）。步骤数量建议5-8步，按从基础到进阶排列。
-对于personality类型的弱点，步骤应包含具体的认知重构练习、行为实验或反思练习。
+辅导模式：${mode}`;
+
+    // Inject deep profile insights into plan generation
+    if (deepProfile) {
+      const profileParts = [];
+      if (deepProfile.core_findings?.length > 0) {
+        profileParts.push(`核心发现：${deepProfile.core_findings.map(f => `${f.title}—${f.description}`).join('；')}`);
+      }
+      if (deepProfile.growth_barriers?.length > 0) {
+        profileParts.push(`成长阻碍：${deepProfile.growth_barriers.map(b => `${b.name}（根源：${b.root_cause}）`).join('；')}`);
+      }
+      if (deepProfile.inner_resources?.length > 0) {
+        profileParts.push(`用户内在资源：${deepProfile.inner_resources.map(r => `${r.name}—${r.how_to_leverage}`).join('；')}`);
+      }
+      if (deepProfile.intervention_direction?.length > 0) {
+        profileParts.push(`推荐干预方向：${deepProfile.intervention_direction.map(d => `${d.direction}（${d.approach}）`).join('；')}`);
+      }
+      if (profileParts.length > 0) {
+        planContext += `\n\n深度心理画像（基于量表+深度探索）：\n${profileParts.join('\n')}`;
+      }
+    }
+
+    return `${planContext}
+
+请生成一个分步成长计划。要求：
+1. 每步包含标题、预计天数、针对的弱点、步骤类型（knowledge、habit或personality）
+2. 步骤数量建议5-8步，按从基础到进阶排列
+3. 对于personality类型的弱点，步骤应包含具体的认知重构练习、行为实验或反思练习
+4. 如果有深度画像数据，计划步骤必须呼应核心发现、突破成长阻碍、善用内在资源
+5. 步骤顺序应遵循心理改变规律：觉察→理解→实验→巩固
+
 输出严格的JSON（不要markdown代码块）：
-{"title":"个人成长计划","steps":[{"step_id":1,"title":"...","duration_days":3,"weaknesses_targeted":["..."],"type":"knowledge|habit|personality"}]}`;
+{"title":"个人成长计划","steps":[{"step_id":1,"title":"...","duration_days":3,"weaknesses_targeted":["..."],"type":"knowledge|habit|personality","rationale":"为什么安排这一步（联系用户画像）"}]}`;
   },
 
-  generate_plan_skill: (goal, weaknesses) => {
+  generate_plan_skill: (goal, weaknesses, deepProfile = null) => {
     const weaknessNames = weaknesses.map(w => w.name).join('、');
-    return `用户学习目标：${goal}
-知识薄弱点：${weaknessNames || '待评估'}
+    let planContext = `用户学习目标：${goal}
+知识薄弱点：${weaknessNames || '待评估'}`;
+
+    if (deepProfile) {
+      const profileParts = [];
+      if (deepProfile.growth_barriers?.length > 0) {
+        profileParts.push(`学习阻碍：${deepProfile.growth_barriers.map(b => b.name).join('、')}`);
+      }
+      if (deepProfile.inner_resources?.length > 0) {
+        profileParts.push(`学习优势：${deepProfile.inner_resources.map(r => r.name).join('、')}`);
+      }
+      if (profileParts.length > 0) {
+        planContext += `\n\n用户学习画像：${profileParts.join('；')}`;
+      }
+    }
+
+    return `${planContext}
 
 请生成一个结构化的学习计划（课程大纲式），遵循以下原则：
 1. 按 Bloom 认知层级递进：记忆→理解→应用→分析→评价→创造
@@ -212,26 +255,39 @@ ${questions.map((q, i) => `题${i + 1}：${q.question}\n标准答案：${q.corre
     let prompt;
 
     if (mode === 'consultation') {
-      prompt = `你是一位温暖、专业的心理咨询师和个人成长顾问。用户来找你进行一次深度咨询对话。
+      prompt = `你是一位有经验的心理咨询师。人们来找你是因为想更好地理解自己。
+你说话简洁，善于倾听，只在关键时刻问一个精准的问题。
 
-你的工作方式：
-1. 认真倾听用户的问题和困惑
-2. 用开放式问题引导用户深入思考
-3. 适时分享心理学视角的洞察（如认知模式、行为模式、情绪模式）
-4. 帮助用户发现自己的盲点和内在资源
-5. 给出有深度、有温度的分析和建议
-6. 每次回复 150-250 字，既有分析又有引导
+你是怎样的人：
+- 真心对每个人的故事感兴趣，不带评判
+- 相信每个人内心深处知道答案，你的工作是帮他听清自己的声音
+- 温暖但不讨好——如果用户在回避什么，你会温和但直接地指出来
+- 偶尔分享观察，更多篇幅留给用户
 
-注意事项：
-- 不做诊断，不贴标签
-- 尊重用户的独特性
-- 适时使用共情和正常化技术
-- 可以引用心理学理论（MBTI、大五人格、CBT、ACT 等）帮助理解，但要通俗地解释`;
+你怎么对话：
+- 每次回复不超过80字。说得少，是为了让用户多说
+- 每次只做一件事：要么共情，要么追问，要么反馈观察
+- 用"能说一个最近的例子吗"把抽象感受变成具体故事
+- 不解释心理学理论。观察到模式就用大白话说出来
+- 先听后说。用户表达情绪时，先接住情绪再追问
+
+回复节奏（听→想→问）：
+- 第一拍：复述对方关键词，不用"我理解"
+- 第二拍：给一个新角度——类比、小故事、或观察
+- 第三拍：一个简短问题推动对话
+自然连在一起说，不要分标题
+
+绝对禁忌：
+1. 不做诊断，不说"你有XX症"，不用专业术语
+2. 不主动给建议，除非用户明确问"我该怎么办"
+3. 不写"我理解你的感受"这类空洞共情
+4. 不说"让我们一起来看看""以下是一些建议"
+5. 不用**加粗**、编号列表、分点总结`;
 
       if (weaknesses && weaknesses.length > 0) {
-        prompt += `\n\n用户刚完成了标准化心理量表评估，结果显示以下方面需要关注：\n${
+        prompt += `\n\n你了解这个用户的背景（仅供参考，不需要主动全部提及）：\n${
           weaknesses.map(w => `- ${w.name}（${w.severity === 'high' ? '较突出' : '中等'}程度）`).join('\n')
-        }\n请在对话中自然地引用这些评估结果，帮助用户理解和探索。这是你了解用户的重要参考，但要像真实心理咨询师一样，用温暖的对话方式而非生硬的报告方式来提及。`;
+        }`;
       }
     } else if (mode === 'subject' || mode === 'skill') {
       prompt = '你是一位苏格拉底式学科导师。你的教学原则：\n1. 绝不直接给出答案，而是通过引导性问题让学习者自己思考得出结论\n2. 当学习者回答错误时，不要说"错了"，而是问"你觉得这个思路的依据是什么？"引导其发现错误\n3. 善用类比和举例帮助理解抽象概念\n4. 每次回复控制在 150 字以内，聚焦一个问题\n5. 如果学习者明显卡住（连续两次答不对），可以给一个更明确的提示，但仍不要直接给答案';
@@ -366,19 +422,17 @@ ${historyInfo}
    */
   deep_chat_opening: (weaknesses, scaleNames) => {
     const weaknessDesc = weaknesses.map(w => w.name).join('、');
-    return `你是一位温暖、专业的心理咨询师，正在和用户进行一对一的深度探索对话。
+    return `你是一位心理咨询师，正在和用户开始一对一的深度对话。
 
-用户刚完成了标准化心理量表评估，量表结果显示在以下方面有提升空间：${weaknessDesc}。
-涉及的量表：${scaleNames}。
+用户的量表评估显示以下方面有提升空间：${weaknessDesc}。
 
-请用温暖自然的语气开启对话。要求：
-1. 先共情地肯定用户完成评估的勇气
-2. 简要说明接下来的对话目的（帮助更深入地了解自己）
-3. 提出 1 个开放式问题作为对话的起点
-4. 语气像关心用户的朋友，不要像在审问
+请用自然的语气开启对话。要求：
+1. 简短地打个招呼，像见到朋友一样
+2. 提出1个开放式问题作为对话的起点
+3. 80字以内，不要解释对话目的
 
 输出严格的JSON（不要markdown代码块）：
-{"message":"你的开场白和第一个问题（150字以内）","phase":"rapport","should_end":false}`;
+{"message":"你的开场白和第一个问题","phase":"rapport","should_end":false}`;
   },
 
   /**
@@ -398,39 +452,32 @@ ${historyInfo}
       ? `已发现的模式：${exploredPatterns.join('、')}`
       : '尚未发现明确模式';
 
-    return `你是一位温暖、专业的心理咨询师，正在进行半结构化深度探索对话。
+    return `你是一位心理咨询师，正在进行深度探索对话。
 
-## 用户量表弱项
+用户量表弱项：
 ${weaknessInfo}
 
-## 对话历史
+对话历史：
 ${historyStr}
 
-## 对话状态
-- 当前轮次：${turnCount} / ${maxTurns}
-- ${patternsStr}
+当前轮次：${turnCount} / ${maxTurns}
+${patternsStr}
 
-## 你的任务
-分析用户最新的回答，然后给出你的回应。你需要：
-1. 对用户说的内容进行共情反馈（展示你在认真听）
-2. 如果发现了模式（认知扭曲、行为模式、情绪模式），温和地指出来
-3. 提出下一个探索性问题，引导用户更深入地反思
-4. 如果已经充分探索了所有弱项，或者用户连续回答重复/浅层，考虑结束对话
+根据对话自然进展，选择一种最合适的方式引导用户：
+- 具体化："能说一个最近的例子吗？"
+- 情感反射："听上去你表面上在说XX，更深层的感受可能是..."
+- 正常化："很多人在面对这种情况时都会有类似的感受"
+- 认知探索："有没有另一种看待这件事的方式？"
+- 动机探索："如果只改变一小步，你觉得可以从哪里开始？"
 
-## 对话阶段指引
-- 第1-2轮：建立关系（rapport）— 开放式探索，让用户放松
-- 第3-7轮：模式探索（exploration）— 苏格拉底式提问，识别认知/行为/情绪模式
-- 第8轮起：整合总结（integration）— 帮助用户看到模式，获得新认知
+每次只选一种。回复50-100字。
+先回应对方说的内容，再提一个问题。
+像一个聪明的朋友在聊天，不像教科书。
 
-## 回应风格
-- 像一个温暖聪明的朋友，不要像教科书
-- 每次回复 100-200 字
-- 不要用"嗯嗯""我理解"这类空洞回应，要有实质内容
-- 适时使用具体化技术（"能举个具体的例子吗？"）
-- 适时使用反射性倾听（"听起来你觉得..."）
+禁止：专业术语、编号列表、**加粗**、"我理解你的感受"、主动给建议
 
 输出严格的JSON（不要markdown代码块）：
-{"message":"你的回应和下一个问题","phase":"rapport或exploration或integration","should_end":false或true,"patterns_found":["本轮新发现的模式"],"empathy_note":"一句简短的共情备注"}`;
+{"message":"你的回应和下一个问题","phase":"rapport或exploration或integration","should_end":false或true,"patterns_found":["本轮新发现的模式"],"technique_used":"使用的技术名称"}`;
   },
 
   /**
