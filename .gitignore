@@ -1,38 +1,47 @@
-# Dependencies
-node_modules/
-
 # Environment & secrets
 .env
-.env.local
-.env.*.local
-backend/.env
+.env.*
+!.env.example
+!.env.production.example
 
-# Database files
-*.db
-*.db.tmp
-data/
-
-# Build output
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
 dist/
+build/
 
-# Logs
-*.log
-npm-debug.log*
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
+# Node
+node_modules/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 
-# Test coverage
-coverage/
+# OS
+.DS_Store
+Thumbs.db
 
-# Temp files
+# Logs
+*.log
+
+# Debug
+*.pyc
+.env.local
+.env.*.local
+backend/.env
+*.db
+*.db.tmp
+data/
+npm-debug.log*
+desktop.ini
+coverage/
 tmp/
 *.tmp
